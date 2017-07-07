@@ -5,7 +5,6 @@ import requests
 
 
 # src=\"(https?://icdn\.lenta\.ru/images/[\d/]+[\d\w]+\.(png|jpeg|jpg))\"
-#https://regex101.com/
 
 proxies = {
   'http': 'http://proxy.proxy.ru:8080',
@@ -15,6 +14,7 @@ proxies = {
 page = requests.get('https://lenta.ru/articles/2017/07/05/navysalon/', proxies=proxies)
 
 text = page.text.split('/n')
+
 pattern = re.compile('src=\"(https?://icdn\.lenta\.ru/images/[\d/]+[\d\w]+\.(png|jpeg|jpg))\"')
 
 image_list = []
@@ -24,8 +24,13 @@ for each_line in text:
     if search_result is not None:
         image_list.append(search_result.group(1))
 
+if not os.path.isdir('im'):
+    os.makedirs('im')
+
 for element in image_list:
     image = requests.get(element, proxies=proxies)
-    image_path = os.path.join('.', os.path.basename(element))
-    with open(image_path, mode='bx') as temp_file:
-        temp_file.write(image.content)
+    image_path = os.path.join('.', 'im', os.path.basename(element))
+    if not os.path.isfile(image_path):
+        with open(image_path, mode='bx') as temp_file:
+            temp_file.write(image.content)
+
